@@ -141,13 +141,12 @@ import Math from 'math';
 
 import moment from 'moment';
 
-import icons from '../../../lib/util/icons';
-import FAIonicon from '../../../lib/aframe/font-awesome-ionicons';
+import icons from '../../../../../lib/util/icons';
+import FAIonicon from '../../../../../lib/aframe/font-awesome-ionicons';
 
 import UserContent from './content-child';
 import UserContact from './contact-child';
 
-console.log("from objects/contact.vue <script>")
 export default {
 	data () {
         return {

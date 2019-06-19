@@ -73,6 +73,28 @@
                     <label for="textures-setting-normal">Normals</label>
                 </div>
             </div>
+
+            <h2> Quality </h2>
+            <div class="input-quality">
+                <div>
+                    <input type="radio" id="quality-setting-low" name="low" value="LOW"
+                            v-model="qualitySetting">
+                    <label for="quality-setting-low">Low</label>
+                </div>
+
+                <div>
+                    <input type="radio" id="quality-setting-med" name="med" value="MEDIUM"
+                            v-model="qualitySetting">
+                    <label for="quality-setting-med">Medium</label>
+                </div>
+
+                <div>
+                    <input type="radio" id="quality-setting-high" name="hiegh" value="HIGH"
+                            checked v-model="qualitySetting">
+                    <label for="quality-setting-high">HIGH</label>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -81,13 +103,14 @@
 <script>
 import { mapState } from 'vuex';
 
-import { SkyboxEnum } from '../../../../store/modules/xr/modules/graphics';
+import { SkyboxEnum, GraphicsQualityEnum } from '../../../../store/modules/xr/modules/graphics';
 
 export default {
 
     data() {
         return {
             skySetting: 'STARS',
+            qualitySetting: 'HIGH',
             settingsStyleObject: {
                 visibility: 'hidden',
             },
@@ -154,7 +177,13 @@ export default {
         ...mapState('xr',
         [
             'isMobile',
-        ])
+        ]),
+        ...mapState('xr/graphics',
+        [
+            'skytime',
+            'skybox',
+            'quality'
+        ]),
     },
 
     watch: {
@@ -166,9 +195,15 @@ export default {
                 console.log(`couldn't change skySetting: ${newVal} is not a SkyboxEnum`);
             }
         },
+        qualitySetting: function (newVal, oldVal) {
+            if (GraphicsQualityEnum.hasOwnProperty(newVal)) {
+                this.$store.commit('xr/graphics/SET_QUALITY', newVal);
+            }
+            else {
+                console.log(`couldn't change qualitySetting: ${newVal} is not a GraphicsQualityEnum`);
+            }
+        },
         mapFloorCheck: function (newVal, oldVal) {
-            console.log(`mapFloorCheck: ${newVal}`);
-            console.log(this.$store.state.xr.graphics.mapFloorSetting);
             // this.mapFloorSetting.set(newVal);
             this.toggleLoadingVisibility();
             this.$store.commit('xr/graphics/SET_FLOOR_MAP_ACTIVE', newVal);
@@ -178,18 +213,37 @@ export default {
 
     mounted() {
         var self = this;
-        document.body.addEventListener('keypress', function(evt) {
-            if (evt.key == 'g') {
-                self.toggleSettingsVisibility();
-            }
-        });
+        document.body.addEventListener('keypress', self.keypressListener);
+        
+        self.inputMapLatitude = self.mapLatitude;
+        self.inputMapLongitude = self.mapLongitude;
+
+        document.body.addEventListener('swapsky', self.swapskyListener);
     },
+
+    beforeDestroy() {
+        document.body.removeEventListener('keypress', this.keypressListener);
+        document.body.removeEventListener('swapsky', this.swapskyListener)
+    },
+
     methods: {
+        keypressListener(evt) {
+            if (evt.key == 'g') {
+                this.toggleSettingsVisibility();
+            }
+        },
+        swapskyListener(evt) {
+            this.toggleSky();
+        },
         toggleSettingsVisibility() {
             // if (CONFIG.DEBUG) {console.log("toggleSettingsVisibility");}
             this.settingsStyleObject.visibility = 
                 this.settingsStyleObject.visibility == 'visible' ?
                 'hidden' : 'visible';
+        },
+        toggleSky() {
+            var newVal = this.skybox == SkyboxEnum.STARS ? 'SUN' : 'STARS';
+            this.$store.commit('xr/graphics/SET_SKYBOX', newVal);
         },
         setCoords() {
             this.$store.commit('xr/graphics/SET_MAP_LATITUDE', this.lat);

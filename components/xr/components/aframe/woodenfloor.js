@@ -16,23 +16,24 @@ AFRAME.registerComponent('wooden-floor', {
       reflectivity: { type: 'number', default: 0.5 },
       withBump: { type: 'boolean', default: false },
       withNormal: { type: 'boolean', default: false },
+      quality: { default: 'l' },
       helper: { default: false }
     },
 
     update: function() {
-        if (this.el.object3DMap.hasOwnProperty('group')) {
-            this.el.removeObject3D('group');
+        if (this.el.object3DMap.hasOwnProperty('mesh')) {
+            this.el.removeObject3D('mesh');
         }
         this._createWoodenFloor();
     },
 
     _createWoodenFloor: function() {
-        console.log("_createWoodenFloor");
+        // if (CONFIG.DEBUG) {console.log("_createWoodenFloor");}
         var self = this;
         var tlHelper = new textureLoaderHelper();
         const baseUrl = 'https://s3.amazonaws.com/lifescope-static/static/xr/textures/WoodenFloor/wood_';
 
-        var baseTexture = tlHelper.loadTexture( 'wood', 'base', 'jpg',
+        var baseTexture = tlHelper.loadTexture( 'wood', 'base', self.data.quality, 'jpg',
             function (texture) {
                 texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
                 texture.offset.set( 0, 0 );
@@ -47,9 +48,10 @@ AFRAME.registerComponent('wooden-floor', {
             shininess: 25,
             } );
         var floorGeometry = new THREE.CircleBufferGeometry(self.data.radius, self.data.radialsegments);
+        floorGeometry.rotateX(-Math.PI / 2);
 
         if (self.data.withBump) {
-            var bumpTexture = tlHelper.loadTexture( 'wood-panel', 'height', 'jpg',
+            var bumpTexture = tlHelper.loadTexture( 'wood-panel', 'height', self.data.quality, 'jpg',
                 function (texture) {
                     floorMaterial.bumpMap = texture;
                     floorMaterial.bumpScale = 1;
@@ -58,23 +60,20 @@ AFRAME.registerComponent('wooden-floor', {
             
         }
         if (self.data.withNormal) {
-            var normalTexture = tlHelper.loadTexture( 'wood-panel', 'normal', 'jpg',
+            var normalTexture = tlHelper.loadTexture( 'wood-panel', 'normal', self.data.quality, 'jpg',
                 function (texture) {
                     floorMaterial.normalMap = texture;
                 } );
         }
             
         var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-        floor.rotation.x = Math.PI / 2;
-        // floor.rotation.z = Math.PI / 2;
-        floor.rotation.z = 1 * Math.PI / 36;
 
         floor.position.set(this.data.x, this.data.y, this.data.z);
 
-        var group = self.el.getObject3D('group') || new THREE.Group();
-        //if (this.data.helper) {group.add(new THREE.BoxHelper(floor, HELPER_COLOR));}
-        group.add(floor);
-        self.el.setObject3D('group', group);
+        // var mesh = self.el.getObject3D('mesh') || new THREE.Group();
+        //if (this.data.helper) {mesh.add(new THREE.BoxHelper(floor, HELPER_COLOR));}
+        // mesh.add(floor);
+        self.el.setObject3D('mesh', floor);
     }
 });
 
@@ -88,6 +87,7 @@ AFRAME.registerPrimitive( 'a-wooden-floor', {
         'y': 'wooden-floor.y',
         'z': 'wooden-floor.z',
         'bump': 'wooden-floor.withBump',
-        'normal': 'wooden-floor.withNormal'
+        'normal': 'wooden-floor.withNormal',
+        'quality': 'wooden-floor.quality'
     }
 });

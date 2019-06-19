@@ -54,14 +54,19 @@ export default {
     computed: {
         ...mapState('xr/graphics',
             [
+                'bump',
+                'normal',
+                'quality'
+            ]
+        ),
+        ...mapState('xr/map',
+            [
                 'floorMapActive',
                 'worldMapActive',
                 'mapLatitude',
                 'mapLongitude',
-                'bump',
-                'normal'
             ]
-        ),
+        )
     },
 
     mounted () {

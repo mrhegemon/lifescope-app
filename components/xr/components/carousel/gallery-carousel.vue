@@ -6,20 +6,80 @@
             :position="railPosition(n-1)"
             :bump="bump"
             :normal="normal"/>
-        <a-custom-image v-for="n in numberOfItemsToDisplay"
-            :key="'carouselImage' + n"
-            :src="imageSrc(items[n-1])"
-            :rotation="dioramaRotation(n-1)"
-            :position="dioramaPosition(n-1)"
-            :bump="bump"
-            :normal="normal"/>
+        <a-entity v-if="$store.state.objects.content.length > 0 ||
+                            $store.state.objects.contacts.length > 0 ||
+                            $store.state.objects.events.length > 0 ">
+            <a-entity v-if="$store.state.facet === 'contacts'">
+                <user-contact
+                    v-for="(contact, index) in itemsCurrent"
+                    :key="contact.id"
+                    :contact="contact"
+                    :connection="contact.connection"
+                    :carouselDim="carouselDim"
+                    :rotation="dioramaRotation(index)"
+                    :position="dioramaPosition(index)">
+                </user-contact>
+            </a-entity>
+            <a-entity  v-if="$store.state.facet === 'content'">
+                <user-content
+                    v-for="(content, index) in itemsCurrent"
+                    :key="content.id"
+                    :content="content"
+                    :connection="content.connection"
+                    :carouselDim="carouselDim"
+                    :rotation="dioramaRotation(index)"
+                    :position="dioramaPosition(index)">
+                </user-content>
+            </a-entity>
+            <a-entity v-if="$store.state.facet === 'events'">
+                <user-event 
+                    v-for="(event, index) in itemsCurrent"
+                    :key="event.id"
+                    :event="event"
+                    :carouselDim="carouselDim"
+                    :rotation="dioramaRotation(index)"
+                    :position="dioramaPosition(index)">
+                </user-event>
+            </a-entity>
+        </a-entity>
     </a-entity>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 
+import UserContact from './objects/contact.vue';
+import UserContent from './objects/content.vue';
+import UserEvent from './objects/event.vue';
+
 export default {
+    data () {
+        return {
+            carouselDim: {
+                wallEdgeOffset: 1,
+                itemsPerWall: 18,
+                layoutMargin: 1,
+                contentHeight: 2,
+                top: 1.5,
+                lineSeparation: 0.1,
+                columnWidth: 1,
+                iconOffset: 0.5,
+                iconWidth: 0.1,
+                backgroundWidth: 0.8,
+                backgroundHeight: 1.5,
+                displayDegrees: -30
+            }
+        }
+    },
+
+    components: {
+        UserContact,
+        UserContent,
+        UserEvent
+    },
+
+
+
     computed: {
         sortedLSObjs() {
             var sorted = this.LSObjs;
@@ -27,6 +87,19 @@ export default {
                 return (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0);
             });
             return sorted;
+        },
+        itemsCurrent: function() {
+            var items;
+            if (this.$store.state.facet === 'contacts') {
+                items = this.$store.state.objects.contacts.slice(this.pageStart, this.pageStart + this.numberOfSegments);
+            }
+            else if (this.$store.state.facet === 'content') {
+                items = this.$store.state.objects.content.slice(this.pageStart, this.pageStart + this.numberOfSegments);
+            }
+            else if (this.$store.state.facet === 'events') {
+                items = this.$store.state.objects.events.slice(this.pageStart, this.pageStart + this.numberOfSegments);
+            }
+            return items;
         },
         items() {
             return this.sortedLSObjs.slice(this.pageStart, this.pageStart + this.numberOfSegments);
@@ -57,6 +130,7 @@ export default {
             ]
         ),
     },
+
     methods: {
         imageSrc: function (image) {
             if(!image)
@@ -93,9 +167,9 @@ export default {
             var theta =  (-3*Math.PI/4) - (u * Math.PI * 2);
 
             var roty = theta * (180/Math.PI);
-            var rotx = 0;
+            var rotx = 180;
 
-            return `${rotx} ${roty} 0`;
+            return `${rotx} ${roty} 180`;
         },
         dioramaPosition: function(segment) {
             var u = segment / this.numberOfSegments + 0.5 / this.numberOfSegments;

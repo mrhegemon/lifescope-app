@@ -1,22 +1,61 @@
 <template>
   <a-entity id="playerRig"
-          position="0 1.6 -2"
-          >
-         
-         <a-entity id="player-camera"
+        position="0 1.6 -2"
+        >
+        <vrhud id="vrhud" v-if="inVR"/>
+        
+        <a-entity id="player-camera"
             class="camera"
-            camera
-          >
-          </a-entity>
+            camera>
+        </a-entity>
+
+        <a-gui-cursor id="cursor" v-if="cursorActive"
+            raycaster="interval: 1000; objects: gui-interactable, .clickable"
+            fuse="true" fuse-timeout="2000"
+            design="dot">
+        </a-gui-cursor>
+
+        <rightHandController ref="righthand" />
+
     </a-entity>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
+import vrhud from "../hud/vr/vrhud.vue";
+import rightHandController from "./RightHandController.vue";
 
 export default {
+    components: {
+        vrhud,
+        rightHandController
+    },
+
+    data () {
+        return {
+            teleporting: false,
+            teleportThreshold: 0.4,
+        }
+    },
+
+    computed: {
+        ...mapState('xr',
+            [
+                'inVR'
+            ]
+        ),
+        ...mapState('xr/avatar',
+            [
+                'cursorActive',
+                'rightHandControllerActive'
+            ]
+        )
+    },
+
     methods: {
         setupDesktop() {
-            console.log("setupDesktop");
+            // if (CONFIG.DEBUG) {console.log("setupDesktop");};
             var playerRig = document.getElementById('playerRig');
             try {
                 if (playerRig) {
@@ -34,7 +73,7 @@ export default {
         },
 
         setupMobile() {
-            console.log("setupMobile");
+            // if (CONFIG.DEBUG) {console.log("setupMobile");};
             var playerRig = document.getElementById('playerRig');
             var camera = playerRig.querySelector('#player-camera');
             var sceneEl = document.getElementsByTagName('a-scene')[0];
@@ -55,6 +94,18 @@ export default {
                 console.log(e);
             }
         },
+
+        setupVR() {
+            // if (CONFIG.DEBUG) {console.log("setupMobile");};
+            this.$store.commit('xr/avatar/SET_RIGHT_HAND_CONTROLLER_ACTIVE', true);
+            this.$refs.righthand.setupControls();
+        },
+
+        tearDownVR() {
+            this.$store.commit('xr/avatar/SET_RIGHT_HAND_CONTROLLER_ACTIVE', false);
+            this.$refs.righthand.tearDownControls();
+        },
+
     }
 }
 </script>

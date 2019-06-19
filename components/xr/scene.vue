@@ -47,8 +47,7 @@ import easyrtc from '../../static/easyrtc/easyrtc.js';
 
 import gallery from "./components/gallery.vue";
 
-import Avatar from "./avatar.js";
-import avatarcomp from "./avatar.vue";
+import avatarcomp from "./components/avatar/avatar";
 
 import { SkyboxEnum } from '../../store/modules/xr/modules/graphics';
 
@@ -81,7 +80,6 @@ export default {
       // if (CONFIG.DEBUG) {console.log("App.vue mounted");};
 
       console.log('scene.vue mounted');
-      console.log(AFRAME);
       console.log(this.roomName);
       var self = this;
 
@@ -147,24 +145,18 @@ export default {
       onEnterVR () {
         var self = this;
         // if (CONFIG.DEBUG) {console.log('entered vr');};
-        if (this.avatar !== null) {
-          this.avatar.createRightHandNetworked();
-        }
-        else {
-          document.body.addEventListener('avatarCreated', function(evt) {
-            console.log("avatarCreated");
-            self.avatar.createRightHandNetworked();
-          })
-        }
+        self.$store.commit('xr/SET_IN_VR', true);
+        this.$refs.avatar.setupVR();
 
         if (AFRAME.utils.device.isMobile()) {
               this.teardownMobile();
         }
       },
       onExitVR () {
+        var self = this;
         // if (CONFIG.DEBUG) {console.log('exited vr');};
-        var rightHand = document.getElementById('rightHandController');
-        rightHand.parentElement.removeChild(rightHand);
+        self.$store.commit('xr/SET_IN_VR', false);
+        self.$refs.avatar.tearDownVR();
 
         if (AFRAME.utils.device.isMobile()) {
           this.setupMobile();

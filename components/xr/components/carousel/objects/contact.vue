@@ -55,10 +55,9 @@
 </template>
 
 <script>
-import icons from '../../../lib/util/icons';
-import FAIonicon from '../../../lib/aframe/font-awesome-ionicons';
+import icons from '../../../../../lib/util/icons';
+import FAIonicon from '../../../../../lib/aframe/font-awesome-ionicons';
 
-console.log("from objects/contact.vue <script>")
 export default {
 	data () {
         return {
