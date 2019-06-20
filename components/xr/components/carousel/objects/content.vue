@@ -1,8 +1,16 @@
 <template>
     <a-entity class="carousel-item carousel-content-item" v-bind:id="content.id">
-		<a-diorama v-if="contentType == 'Image'"
-			:src="content.embed_content"/>
-		<a-diorama-text v-else :value='text'/>
+		<a-diorama 
+			:contenttype="contentType"
+			:type="content.type"
+			:src="content.embed_content"
+			:title="content.title"
+			:textt="content.text"
+			:url="content.url"
+			:provider="connection.provider.name"
+			:connectionname="connection.name"
+			/>
+			<!-- :tags="content.tags" -->
 	</a-entity>
 </template>
 

@@ -68,7 +68,9 @@ export default {
                 backgroundWidth: 0.8,
                 backgroundHeight: 1.5,
                 displayDegrees: -30
-            }
+            },
+            railheight: 1.2,
+            floorradius: 6,
         }
     },
 
@@ -156,8 +158,8 @@ export default {
             var sinTheta = Math.sin( theta );
             var cosTheta = Math.cos( theta );
 
-            var x = 6 * sinTheta;
-            var z = 6 * cosTheta;
+            var x = this.floorradius * sinTheta;
+            var z = this.floorradius * cosTheta;
 
             return `${x} 0 ${z}`;
         },
@@ -167,9 +169,10 @@ export default {
             var theta =  (-3*Math.PI/4) - (u * Math.PI * 2);
 
             var roty = theta * (180/Math.PI);
-            var rotx = 180;
+            var rotx = 0;
+            var rotz = 0;
 
-            return `${rotx} ${roty} 180`;
+            return `${rotx} ${roty} ${rotz}`;
         },
         dioramaPosition: function(segment) {
             var u = segment / this.numberOfSegments + 0.5 / this.numberOfSegments;
@@ -179,10 +182,10 @@ export default {
             var sinTheta = Math.sin( theta );
             var cosTheta = Math.cos( theta );
 
-            var x = 6.2 * sinTheta;
-            var z = 6.2 * cosTheta;
+            var x = this.floorradius * sinTheta;
+            var z = this.floorradius * cosTheta;
 
-            return `${x} 1.5 ${z}`;
+            return `${x} 0 ${z}`;
         },
     },
   }

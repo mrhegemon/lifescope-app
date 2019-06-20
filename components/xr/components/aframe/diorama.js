@@ -258,6 +258,8 @@ AFRAME.registerComponent('diorama-case', {
         imagewidth: { type: 'number', default: 0.6 },
         imageheight: { type: 'number', default: 0.6 },
 
+        textPadding: { type: 'number', default: 0.01 },
+
         casedepth: { type: 'number', default: 0.06 },
         bronzedepth: { type: 'number', default: 0.01 },
         casemargin: { type: 'number', default: 0.05 },
@@ -276,6 +278,16 @@ AFRAME.registerComponent('diorama-case', {
         withBump: { default: false },
         withNormal: { default: false },
         quality: { default: 'l' }, //, oneOf: ['s', 'm', 'l']
+
+        textColor: { default: 'white' },
+        contentType: { type: 'string', default: '' },
+        type: { type: 'string', default: '' },
+        title: { type: 'string', default: '' },
+        textt: { type: 'string', default: '' },
+        url: { type: 'string', default: '' },
+        provider: { type: 'string', default: '' },
+        connectionName: { type: 'string', default: '' },
+        // tags: { default: [] },
     },
 
     multiple: true,
@@ -293,8 +305,13 @@ AFRAME.registerComponent('diorama-case', {
             self._createDiorama();
         }
 
-        if (self.data.imageURL != '') {
+        if (self.data.contentType == 'Image') {
             self._createImage();
+        }
+        else {
+            if (self.data.title != undefined){
+                self._createText();
+            }
         }
         
     },
@@ -425,6 +442,44 @@ AFRAME.registerComponent('diorama-case', {
         self.el.setObject3D(self.id, group); 
     },
 
+    _createText() {
+        var self = this;
+        var data = self.data;
+        var el = self.el;
+
+        var text = '';
+        text += data.provider ? data.provider + '\t': '';//+ '\n\n' : '';
+        text += data.connectionName ? data.connectionName + '\n\n' : '\n\n';
+        text += data.type ? data.type + '\n\n' : '';
+        text += data.title ? data.title + '\n\n' : '';
+        text += data.textt ? data.textt.slice(0, 400) + '\n\n' : '';
+        text += data.url ? data.url + '\n\n' : '';
+
+        var textEl = document.createElement('a-entity');
+        textEl.setAttribute('width', data.imagewidth);
+        textEl.setAttribute('height', data.imageheight);
+        textEl.setAttribute('text', {
+            value: text,
+            width: data.imagewidth ,//- 2*data.textPadding,
+            height: data.imageheight,
+            xOffset: data.textPadding,
+            color: data.textColor
+        });
+        textEl.object3D.position.y += data.imageheight/2;
+        textEl.object3D.rotation.set(
+            THREE.Math.degToRad(data.rotationx),
+            THREE.Math.degToRad(180),
+            THREE.Math.degToRad(0)
+          );
+        var dx = data.x;
+        var dy = data.y + data.railheight;
+        var dz = data.z - 0.15;
+        textEl.object3D.position.x += dx;
+        textEl.object3D.position.y += dy;
+        textEl.object3D.position.z += dz;
+        el.appendChild(textEl);
+    }
+
 });
 
 
@@ -441,6 +496,14 @@ AFRAME.registerPrimitive( 'a-diorama', {
         'quality': 'diorama-case.quality',
         'src': 'diorama-case.imageURL',
         'srcfit': 'diorama-case.srcFit',
+        'contenttype': 'diorama-case.contentType',
+        'type': 'diorama-case.type',
+        'title': 'diorama-case.title',
+        'textt': 'diorama-case.textt',
+        'url': 'diorama-case.url',
+        'provider': 'diorama-case.provider',
+        'connectionname': 'diorama-case.connectionName',
+        // 'tags': 'diorama-case.tags',
     }
 });
 
