@@ -507,13 +507,171 @@ AFRAME.registerPrimitive( 'a-diorama', {
     }
 });
 
-AFRAME.registerPrimitive( 'a-diorama-text', {
+
+AFRAME.registerComponent('diorama-content', {
+    schema: {
+        x: { type: 'number', default: 0},
+        y: { type: 'number', default: 0},
+        z: { type: 'number', default: 0},
+        rotationx: { type: 'number', default: 30 }, // degrees
+
+        width: { type: 'number', default: 1 },
+        height: { type: 'number', default: 1 },
+
+        lineheight: { type: 'number', default: 0.1 },
+
+        providerIcon: { default: '' },
+        contentIcon: { default: '' },
+        textPadding: { type: 'number', default: 0.1 },
+        zTextOffset: { type: 'number', default: 0.1 },
+
+        railheight: { type: 'number', default: 1.2 },
+
+        opacity: { type: 'number', default: 0.6 },
+
+        textColor: { default: 'white' },
+        contentType: { type: 'string', default: '' },
+        type: { type: 'string', default: '' },
+        title: { type: 'string', default: '' },
+        textt: { type: 'string', default: '' },
+        url: { type: 'string', default: '' },
+        provider: { type: 'string', default: '' },
+        connectionName: { type: 'string', default: '' },
+        // tags: { default: [] },
+    },
+
+    update: function() {
+        var self = this;
+        var data = self.data;
+        self._createBackground();
+
+        var offset = {x:0, y:-0.3, z:0}
+
+        var textStyle = {
+            color: data.textColor
+        }
+
+        self._addIcon(data.providerIcon, offset);
+        self._createText(data.provider, offset, textStyle);
+        offset.y -= data.lineheight;
+
+        self._addIcon(data.contentIcon, offset);
+        self._createText(data.type, offset, textStyle);
+        offset.y -= data.lineheight;
+
+        self._createText(data.title, offset, textStyle);
+        offset.y -= data.lineheight;
+
+        textStyle.color = 'blue';
+        self._createText(data.textt, offset, textStyle);
+
+        offset.y -= data.lineheight;
+        
+    },
+
+    _createBackground() {
+        var self = this;
+        var data = self.data;
+        var loader = new THREE.TextureLoader();
+        const map = loader.load('xr/diorama.png');
+        const geometry = new THREE.PlaneGeometry(data.width, data.height, 1, 1);
+		const material = new THREE.MeshBasicMaterial({
+            // color: data.bgcolor,
+            map: map,
+			opacity: data.opacity,
+			transparent: true,
+			// blending: THREE.AdditiveBlending,
+			side: THREE.DoubleSide
+        });
+        var offset = {
+            x: 0,
+            y: data.railheight + 0.3,
+            z: -.15
+        }
+
+        geometry.translate(data.x + offset.x, data.y + offset.y, data.z + offset.z)
+        var mesh = new THREE.Mesh(geometry, material);
+        var group = self.el.getObject3D('background') || new THREE.Group();
+        group.add(mesh);
+        self.el.setObject3D('background', group); 
+    },
+
+    _createText(text, offset, textStyle) {
+        var self = this;
+        var data = self.data;
+        var el = self.el;
+
+
+        var textEl = document.createElement('a-entity');
+        textEl.setAttribute('width', data.width);
+        textEl.setAttribute('height', data.lineheight);
+        textEl.setAttribute('text', {
+            value: text,
+            width: data.width ,//- 2*data.textPadding,
+            height: data.lineheight,
+            xOffset: data.textPadding,
+            zOffset: data.textPadding,
+            color: textStyle.color
+        });
+        textEl.object3D.position.y += data.height - data.textPadding;
+        textEl.object3D.rotation.set(
+            0,//THREE.Math.degToRad(data.rotationx),
+            THREE.Math.degToRad(180),
+            THREE.Math.degToRad(0)
+          );
+        var dx = data.x;
+        var dy = data.y + data.railheight + offset.y;
+        var dz = data.z - 0.15;
+        textEl.object3D.position.x += dx;
+        textEl.object3D.position.y += dy;
+        textEl.object3D.position.z += dz;
+        el.appendChild(textEl);
+    },
+
+    _addIcon(iconName, offset) {
+        var self = this;
+        var data = self.data;
+        var el = self.el;
+
+        var iconEl = document.createElement('a-entity');//'a-ionicon');
+        iconEl.setAttribute('ionicon', {
+            icon: iconName,
+            width: 0.2,
+            height: 0.2
+        });
+
+        iconEl.object3D.position.y += data.height - data.textPadding;
+        iconEl.object3D.rotation.set(
+            0,//THREE.Math.degToRad(data.rotationx),
+            THREE.Math.degToRad(180),
+            THREE.Math.degToRad(0)
+          );
+        var dx = data.x + offset.x - data.width/2 + data.textPadding;
+        var dy = data.y + data.railheight + offset.y;
+        var dz = data.z - 0.15 + offset.z;
+        iconEl.object3D.position.x += dx;
+        iconEl.object3D.position.y += dy;
+        iconEl.object3D.position.z += dz;
+        el.appendChild(iconEl);
+    }
+});
+
+AFRAME.registerPrimitive( 'a-diorama-content', {
     defaultComponents: {
-        'text': {
+        'diorama-content': {
+            'railheight': 1.2
         },
 
     },
     mappings: {
-        'value': 'text.value'
+        'contenttype': 'diorama-content.contentType',
+        'type': 'diorama-content.type',
+        'title': 'diorama-content.title',
+        'textt': 'diorama-content.textt',
+        'url': 'diorama-content.url',
+        'provider': 'diorama-content.provider',
+        'connectionname': 'diorama-content.connectionName',
+        'providericon': 'diorama-content.providerIcon',
+        'contenticon': 'diorama-content.contentIcon',
     }
 })

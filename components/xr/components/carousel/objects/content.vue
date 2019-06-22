@@ -1,6 +1,6 @@
 <template>
     <a-entity class="carousel-item carousel-content-item" v-bind:id="content.id">
-		<a-diorama 
+		<a-diorama v-if="content.embed_content == 'image'"
 			:contenttype="contentType"
 			:type="content.type"
 			:src="content.embed_content"
@@ -9,6 +9,20 @@
 			:url="content.url"
 			:provider="connection.provider.name"
 			:connectionname="connection.name"
+			:providericon="providerIonicon"
+			:contenticon="contentTypeIonicon"
+			/>
+		<a-diorama-content v-else
+			:contenttype="contentType"
+			:type="content.type"
+			:src="content.embed_content"
+			:title="content.title"
+			:textt="content.text"
+			:url="content.url"
+			:provider="connection.provider.name"
+			:connectionname="connection.name"
+			:providericon="providerIonicon"
+			:contenticon="contentTypeIonicon"
 			/>
 			<!-- :tags="content.tags" -->
 	</a-entity>
@@ -19,7 +33,7 @@ var CONFIG = {};
 CONFIG.DEBUG = false;
 
 import icons from '../../../../../lib/util/icons';
-import FAIonicon from '../../../../../lib/aframe/font-awesome-ionicons';
+import FAIonicon from '../../aframe/font-awesome-ionicons'
 
 const audioTypes = ['mp3', 'ogga', 'wav'];
 const imageTypes = ['png', 'jpg', 'jpeg', 'svg', 'tiff', 'bmp', 'webp'];
@@ -76,7 +90,18 @@ export default {
 				default:
 					return '';
 			}
-		}
+		
+		},
+		contentTypeIonicon: function() {
+			var icon = icons('provider', this.content.type);
+			var regex=/fa\-[a-zA-Z\-]+/i;
+			return FAIonicon[icon.match(regex)[0]];
+		},
+		providerIonicon: function() {
+			var icon = icons('provider', this.connection.provider.name);
+			var regex=/fa\-[a-zA-Z\-]+/i;
+			return FAIonicon[icon.match(regex)[0]];
+		},
     },
   }
 </script>
