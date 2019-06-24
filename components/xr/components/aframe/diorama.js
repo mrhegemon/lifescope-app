@@ -1,5 +1,17 @@
 import textureLoaderHelper from './textureLoaderHelper.js';
+import moment from 'moment';
 
+function dateShort (date) {
+    return moment.utc(date).local().format('YYYY/MM/DD');
+}
+
+function dateTiny (date) {
+    return moment.utc(date).local().format('M/D/YY');
+}
+
+function dateTime (date) {
+    return moment.utc(date).local().format('hh:mm A');
+}
 
 function _buildMaterial(type, quality='l', withBump=false, withNormal=false, repeatU=1, repeatV=1, props={}) {
     var material, baseTexture, bumpTexture, nomralTexture;
@@ -508,15 +520,18 @@ AFRAME.registerPrimitive( 'a-diorama', {
 });
 
 
-AFRAME.registerComponent('diorama-content', {
+AFRAME.registerComponent('diorama-object', {
     schema: {
         x: { type: 'number', default: 0},
         y: { type: 'number', default: 0},
         z: { type: 'number', default: 0},
         rotationx: { type: 'number', default: 30 }, // degrees
 
+        facet: { type: 'string', deafult: 'content' },
+
         width: { type: 'number', default: 1 },
         height: { type: 'number', default: 1 },
+        imagedepth: { type: 'number', default: 0.01 },
 
         lineheight: { type: 'number', default: 0.1 },
 
@@ -537,6 +552,14 @@ AFRAME.registerComponent('diorama-content', {
         url: { type: 'string', default: '' },
         provider: { type: 'string', default: '' },
         connectionName: { type: 'string', default: '' },
+
+        context: { type: 'string', default: '' },
+        datetime: { type: 'number', default: 0 }, 
+        eventIcon: { type: 'string', default: '' },
+
+        avatarurl: { type: 'string', default: '' },
+        contactName: { type: 'string', default: '' },
+        contactHandle: { type: 'string', default: '' }
         // tags: { default: [] },
     },
 
@@ -551,21 +574,66 @@ AFRAME.registerComponent('diorama-content', {
             color: data.textColor
         }
 
-        self._addIcon(data.providerIcon, offset);
-        self._createText(data.provider, offset, textStyle);
-        offset.y -= data.lineheight;
+        switch (data.facet) {
+            case 'content':
+                self._addIcon(data.providerIcon, offset);
+                self._createText(data.provider, offset, textStyle);
+                offset.y -= data.lineheight;
 
-        self._addIcon(data.contentIcon, offset);
-        self._createText(data.type, offset, textStyle);
-        offset.y -= data.lineheight;
+                self._addIcon(data.contentIcon, offset);
+                self._createText(data.type, offset, textStyle);
+                offset.y -= data.lineheight;
 
-        self._createText(data.title, offset, textStyle);
-        offset.y -= data.lineheight;
+                self._createText(data.title, offset, textStyle);
+                offset.y -= data.lineheight;
 
-        textStyle.color = 'blue';
-        self._createText(data.textt, offset, textStyle);
+                textStyle.color = 'blue';
+                self._createText(data.textt, offset, textStyle);
+                break;
+            case 'event':
+                self._addIcon(data.eventIcon, offset);
+                offset.y -= data.lineheight;
+                if (data.context != '') {
+                    self._createText(data.context, offset, textStyle);
+                    offset.y -= data.lineheight;
+                }
+                else {
+                    self._createText(data.type, offset, textStyle);
+                    offset.y -= data.lineheight;
+                }
+                // provider
+                self._addIcon(data.providerIcon, offset);
+                self._createText(data.provider, offset, textStyle);
+                offset.y -= data.lineheight;
+                
+                // datetime
 
-        offset.y -= data.lineheight;
+                self._addIcon('calendar', offset);
+                self._createText(dateShort(data.datatime), offset, textStyle);
+                offset.y -= data.lineheight;
+
+                // tags
+                // content
+                // interactions
+                break;
+            case 'contact':
+            case 'people':
+                if (data.avatarurl != '') {
+                    console.log('avatarurl != \'\'');
+                    self._createImage(data.avatarurl, {
+                        x: 0,
+                        y: data.railheight + 0.3,
+                        z: -.15
+                    });
+                }
+                else {
+                    self._addIcon('android-person', offset);
+                    offset.y -= data.lineheight;
+                }
+            default:
+                break;
+        }
+
         
     },
 
@@ -653,25 +721,75 @@ AFRAME.registerComponent('diorama-content', {
         iconEl.object3D.position.y += dy;
         iconEl.object3D.position.z += dz;
         el.appendChild(iconEl);
-    }
+    },
+
+    _createImage(imageURL, offset) {
+        var self = this;
+        var data = self.data;
+
+        var imgMaterial, colorMaterial, geom, mesh;
+
+        var texture = new THREE.TextureLoader().load( imageURL, function () {
+            var srcWidth = texture.image.videoWidth || texture.image.width;
+            var srcHeight = texture.image.videoHeight || texture.image.height;
+            var aspectRatio = (srcWidth || 1.0) / (srcHeight || 1.0);
+            var geomWidth, geomHeight;
+            if (data.srcFit == 'width') {
+                geomWidth = data.imagewidth;
+                geomHeight = data.imagewidth / aspectRatio;
+            }
+            else {
+                geomWidth = data.imageheight * aspectRatio;
+                geomHeight = data.imageheight;
+            }
+            
+            geom = new THREE.BoxBufferGeometry(geomWidth, geomHeight, data.imagedepth );
+            // geom.rotateX(2 * Math.PI * data.rotationx / 360);
+            geom.translate(offset.x, offset.y, offset.z);
+    
+            imgMaterial = new THREE.MeshBasicMaterial( { map: texture } );
+            colorMaterial = new THREE.MeshBasicMaterial( {color: new THREE.Color( 0xffffff )} );
+    
+            var materials = [
+                colorMaterial,        // Left side
+                colorMaterial,       // Right side
+                colorMaterial,         // Top side
+                colorMaterial,      // Bottom side
+                colorMaterial,       // Front side
+                imgMaterial         // Back side
+            ];
+            mesh = new THREE.Mesh(geom, materials);
+    
+            var group = self.el.getObject3D('image') || new THREE.Group();
+            group.add(mesh);
+            self.el.setObject3D('image', group);   
+        } );
+    },
 });
 
-AFRAME.registerPrimitive( 'a-diorama-content', {
+AFRAME.registerPrimitive( 'a-diorama-object', {
     defaultComponents: {
-        'diorama-content': {
+        'diorama-object': {
             'railheight': 1.2
         },
 
     },
     mappings: {
-        'contenttype': 'diorama-content.contentType',
-        'type': 'diorama-content.type',
-        'title': 'diorama-content.title',
-        'textt': 'diorama-content.textt',
-        'url': 'diorama-content.url',
-        'provider': 'diorama-content.provider',
-        'connectionname': 'diorama-content.connectionName',
-        'providericon': 'diorama-content.providerIcon',
-        'contenticon': 'diorama-content.contentIcon',
+        'facet': 'diorama-object.facet',
+        'contenttype': 'diorama-object.contentType',
+        'type': 'diorama-object.type',
+        'title': 'diorama-object.title',
+        'textt': 'diorama-object.textt',
+        'url': 'diorama-object.url',
+        'provider': 'diorama-object.provider',
+        'connectionname': 'diorama-object.connectionName',
+        'providericon': 'diorama-object.providerIcon',
+        'contenticon': 'diorama-object.contentIcon',
+        'eventicon': 'diorama-object.eventIcon',
+        'context': 'diorama-object.context',
+        'datetime': 'diorama-object.datetime',
+        'avatarurl': 'diorama-object.avatarurl',
+        'contactname': 'diorama-object.contactName',
+        'contacthandle': 'diorama-object.contactHandle',
     }
 })

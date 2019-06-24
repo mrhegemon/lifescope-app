@@ -15,7 +15,6 @@
                     :key="contact.id"
                     :contact="contact"
                     :connection="contact.connection"
-                    :carouselDim="carouselDim"
                     :rotation="dioramaRotation(index)"
                     :position="dioramaPosition(index)">
                 </user-contact>
@@ -26,7 +25,6 @@
                     :key="content.id"
                     :content="content"
                     :connection="content.connection"
-                    :carouselDim="carouselDim"
                     :rotation="dioramaRotation(index)"
                     :position="dioramaPosition(index)">
                 </user-content>
@@ -36,10 +34,18 @@
                     v-for="(event, index) in itemsCurrent"
                     :key="event.id"
                     :event="event"
-                    :carouselDim="carouselDim"
                     :rotation="dioramaRotation(index)"
                     :position="dioramaPosition(index)">
                 </user-event>
+            </a-entity>
+            <a-entity v-if="$store.state.facet === 'people'">
+                <user-person
+                    v-for="person in $store.state.objects.people"
+                    v-bind:key="person.id"
+                    v-bind:person="person"
+                    :rotation="dioramaRotation(index)"
+                    :position="dioramaPosition(index)">
+                </user-person>
             </a-entity>
         </a-entity>
     </a-entity>
@@ -51,24 +57,11 @@ import { mapState } from 'vuex';
 import UserContact from './objects/contact.vue';
 import UserContent from './objects/content.vue';
 import UserEvent from './objects/event.vue';
+import UserPerson from './objects/people.vue';
 
 export default {
     data () {
         return {
-            carouselDim: {
-                wallEdgeOffset: 1,
-                itemsPerWall: 18,
-                layoutMargin: 1,
-                contentHeight: 2,
-                top: 1.5,
-                lineSeparation: 0.1,
-                columnWidth: 1,
-                iconOffset: 0.5,
-                iconWidth: 0.1,
-                backgroundWidth: 0.8,
-                backgroundHeight: 1.5,
-                displayDegrees: -30
-            },
             railheight: 1.2,
             floorradius: 6,
         }
@@ -77,7 +70,8 @@ export default {
     components: {
         UserContact,
         UserContent,
-        UserEvent
+        UserEvent,
+        UserPerson
     },
 
 

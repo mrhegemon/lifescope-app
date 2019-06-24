@@ -12,7 +12,8 @@
 			:providericon="providerIonicon"
 			:contenticon="contentTypeIonicon"
 			/>
-		<a-diorama-content v-else
+		<a-diorama-object v-else
+			facet='content'
 			:contenttype="contentType"
 			:type="content.type"
 			:src="content.embed_content"
@@ -33,7 +34,7 @@ var CONFIG = {};
 CONFIG.DEBUG = false;
 
 import icons from '../../../../../lib/util/icons';
-import FAIonicon from '../../aframe/font-awesome-ionicons'
+import FAIonicon from '../../aframe/font-awesome-ionicons';
 
 const audioTypes = ['mp3', 'ogga', 'wav'];
 const imageTypes = ['png', 'jpg', 'jpeg', 'svg', 'tiff', 'bmp', 'webp'];
@@ -46,25 +47,9 @@ export default {
 			iconSize: 0.25,
         }
     },
-	props: ['content', 'connection', 'carouselDim'],
+	props: ['content', 'connection'],
 
 	computed: {
-		text: function() {
-			var str = '';
-			str += this.content.type + '\n';
-			if (this.connection.name !== undefined ) {
-				str += this.connection.name + '\n';
-			}
-			str += this.contentType + '\n';
-			str += this.content.title + '\n';
-			str += this.content.text + '\n';
-			str += this.content.url + '\n';
-			str += 'Tags\n';
-			for (var tag of this.content.tags) {
-				str += tag + '\n';
-			}
-			return str;
-		},
 		contentType: function() {
 			switch (this.content.embed_format.toLowerCase()) {
 				case 'mp3':
@@ -93,7 +78,7 @@ export default {
 		
 		},
 		contentTypeIonicon: function() {
-			var icon = icons('provider', this.content.type);
+			var icon = icons('content', this.content.type);
 			var regex=/fa\-[a-zA-Z\-]+/i;
 			return FAIonicon[icon.match(regex)[0]];
 		},

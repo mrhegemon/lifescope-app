@@ -1,11 +1,11 @@
 <template>
-	<a-entity class="object contact" v-bind:id="contact.id">
+	<a-entity class="object people" v-bind:id="people.id">
 
 		<a-diorama-object
-			facet='contact'
-			:avatarurl='contact.avatar_url'
-			:contactname='contact.name'
-			:contacthandle='contact.handle'
+			facet='people'
+			:avatarurl='person.avatar_url'
+			:contactname='person.name'
+			:contacthandle='person.handle'
 			/>
 	</a-entity>
 </template>
@@ -22,6 +22,6 @@ export default {
         }
 	},
 
-	props: ['contact', 'connection'],
+	props: ['person'],
   }
 </script>

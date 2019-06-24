@@ -10,7 +10,7 @@ var FAIonicon = {'fa-circle-o': 'radio-button-off',
     'fa-file-o': 'document',
     'fa-gamepad': 'game-controller-a',
     'fa-picture-o': 'image',
-    'fa-dollar': 'cash', //'logo-usd',
+    'fa-dollar': 'cash', //'social-usd',
     'fa-floppy-o': 'disc',
     'fa-file-text-o': 'ios-paper', // paper list-box
     'fa-video-camera': 'videocam',
@@ -44,19 +44,19 @@ var FAIonicon = {'fa-circle-o': 'radio-button-off',
     'fa-shopping-bag': 'basket', // archive basket cart
     'fa-futbol-o': 'football',
     'fa-plug': 'outlet', // outlet bulb
-    'fa-chrome': 'logo-chrome',
-    'fa-dropbox': 'logo-dropbox',
+    'fa-chrome': 'social-chrome',
+    'fa-dropbox': 'social-dropbox',
     'fa-firefox': 'flame', // bonfire flame
     'fa-fitbit': 'keypad', // apps keypad
-    'fa-facebook': 'logo-facebook',
+    'fa-facebook': 'social-facebook',
     'fa-github': 'social-github',
-    'fa-google': 'logo-google',
-    'fa-instagram': 'logo-instagram',
+    'fa-google': 'social-google',
+    'fa-instagram': 'social-instagram',
     'fa-reddit-alien': 'social-reddit',
     'fa-slice': 'pizza', // cut pizza
-    'fa-spotify': 'logo-rss', // logo-rss
-    'fa-steam': 'logo-steam',
-    'fa-twitter': 'logo-twitter',
+    'fa-spotify': 'social-rss', // social-rss
+    'fa-steam': 'social-steam',
+    'fa-twitter': 'social-twitter',
     'fa-safari': 'browsers',
     'fa-edge': 'browsers'
 }
