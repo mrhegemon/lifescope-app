@@ -1,4 +1,5 @@
 import textureLoaderHelper from './textureLoaderHelper.js';
+import CelShader from '../../shaders/CelShader';
 import moment from 'moment';
 
 function dateShort (date) {
@@ -13,9 +14,8 @@ function dateTime (date) {
     return moment.utc(date).local().format('hh:mm A');
 }
 
-function _buildMaterial(type, quality='l', withBump=false, withNormal=false, repeatU=1, repeatV=1, props={}) {
+function _buildMaterial(shading, type, quality='l', withBump=false, withNormal=false, repeatU=1, repeatV=1, props={}) {
     var material, baseTexture, bumpTexture, nomralTexture;
-    var tlHelper = new textureLoaderHelper();
 
     if (type=='glass') {
         material = new THREE.MeshPhysicalMaterial( 
@@ -33,10 +33,16 @@ function _buildMaterial(type, quality='l', withBump=false, withNormal=false, rep
         return material
     }
 
+    if (shading=='cel') {
+        var material = new CelShader(materialColors.get(type), props);
+        return material;
+    }
+
+    var tlHelper = new textureLoaderHelper();
+
     baseTexture = tlHelper.loadTexture( type, 'base', quality, 'jpg',
         function (texture) {
             texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-            texture.offset.set( 0, 0 );
             texture.repeat.set( repeatU, repeatV );
     });
     
@@ -63,6 +69,7 @@ function _buildMaterial(type, quality='l', withBump=false, withNormal=false, rep
             }
         );
     }
+    material.needsUpdate = true;
     return material;
 }
 
@@ -188,6 +195,7 @@ AFRAME.registerComponent('diorama-rail', {
         withBump: { default: false },
         withNormal: { default: false },
         quality: { default: 'l' }, //, oneOf: ['s', 'm', 'l']
+        shading: { default: 'default' },
     },
 
     multiple: true,
@@ -202,16 +210,22 @@ AFRAME.registerComponent('diorama-rail', {
         }
     },
 
+    remove: function () {
+        if (this.el.object3DMap.hasOwnProperty(this.id)) {
+            this.el.removeObject3D(this.id);
+        }
+    },
+
     _createRail() {
         var data = this.data;
-        this._createDioramaComponent('bronze', 'column');
-        this._createDioramaComponent('bronze', 'sphere');
+        this._createDioramaComponent('brass', 'column');
+        this._createDioramaComponent('brass', 'sphere');
         this._createDioramaComponent('wood-panel', 'base');
         this._createDioramaComponent('wood-panel', 'base', 'top');
-        this._createDioramaComponent('bronze', 'trim', '', 'front');
-        this._createDioramaComponent('bronze', 'trim', '', 'back');
-        this._createDioramaComponent('bronze', 'trim', 'top', 'front');
-        this._createDioramaComponent('bronze', 'trim', 'top', 'back');
+        this._createDioramaComponent('brass', 'trim', '', 'front');
+        this._createDioramaComponent('brass', 'trim', '', 'back');
+        this._createDioramaComponent('brass', 'trim', 'top', 'front');
+        this._createDioramaComponent('brass', 'trim', 'top', 'back');
         this._createDioramaComponent('glass', 'glass', '', '', {
             color: data.color,
             metalness: data.metalness,
@@ -228,8 +242,15 @@ AFRAME.registerComponent('diorama-rail', {
         data.pos = pos;
         data.side = side;
     
-        material = _buildMaterial(type, data.quality, data.withBump, data.withNormal, data.repeatU, data.repeatV, props);
+        material = _buildMaterial(data.shading, type, data.quality, data.withBump, data.withNormal, data.repeatU, data.repeatV, props);
         geom = _buildGeometry(shape, data);
+        if (shape == 'base' && material.map != undefined) {
+            var texture = material.map;
+            var offsetx = (data.floorradius) * Math.sin(2 * Math.PI / data.radialsegments);
+            var offsety = data.baseheight / 2
+            texture.rotation = Math.PI / 2;
+            texture.offset.set( offsetx, offsety );
+        }
         mesh = new THREE.Mesh(geom, material);
     
         var group = self.el.getObject3D(self.id) || new THREE.Group();
@@ -243,16 +264,18 @@ AFRAME.registerComponent('diorama-rail', {
 AFRAME.registerPrimitive( 'a-rail', {
     defaultComponents: {
         'diorama-rail__rail': { 
-            'railheight': 1.2
+            repeatV: 1,
         },
 
     },
     mappings: {
-        'radius': 'diorama-rail.floorradius',
-        'bump': 'diorama-rail.withBump',
-        'normal': 'diorama-rail.withNormal',
-        'quality': 'diorama-rail.quality',
-        'radialsegments': 'diorama-rail.radialsegments'
+        'radius': 'diorama-rail__rail.floorradius',
+        'bump': 'diorama-rail__rail.withBump',
+        'normal': 'diorama-rail__rail.withNormal',
+        'quality': 'diorama-rail__rail.quality',
+        'radialsegments': 'diorama-rail__rail.radialsegments',
+        'railheight': 'diorama-rail__rail.railheight',
+        'shading': 'diorama-rail__rail.shading',
     }
 });
 
@@ -290,6 +313,7 @@ AFRAME.registerComponent('diorama-case', {
         withBump: { default: false },
         withNormal: { default: false },
         quality: { default: 'l' }, //, oneOf: ['s', 'm', 'l']
+        shading: { default: 'default' },
 
         textColor: { default: 'white' },
         contentType: { type: 'string', default: '' },
@@ -328,6 +352,15 @@ AFRAME.registerComponent('diorama-case', {
         
     },
 
+    remove: function () {
+        if (this.el.object3DMap.hasOwnProperty(this.id)) {
+            this.el.removeObject3D(this.id);
+        }
+        if (this.el.object3DMap.hasOwnProperty('image')) {
+            this.el.removeObject3D('image');
+        }
+    },
+
     _createDiorama() {
         var self = this;
         var data = self.data;
@@ -351,7 +384,7 @@ AFRAME.registerComponent('diorama-case', {
             }
         );
         self._createCase(
-            'bronze',
+            'brass',
             data.imagewidth,
             data.imageheight,
             data.bronzedepth,
@@ -362,7 +395,7 @@ AFRAME.registerComponent('diorama-case', {
             }
         );
         self._createCase(
-            'wood',
+            'wood-panel',
             data.imagewidth + 0.06,
             data.imageheight + 0.07,
             data.bronzedepth*2,
@@ -373,7 +406,7 @@ AFRAME.registerComponent('diorama-case', {
             }
         );
         self._createCase(
-            'bronze',
+            'brass',
             0.03,
             0.03,
             0.2,
@@ -445,7 +478,7 @@ AFRAME.registerComponent('diorama-case', {
         data.depth = depth;
         data.offset = offset;
     
-        material = _buildMaterial(type, data.quality, data.withBump, data.withNormal, data.repeatU, data.repeatV, props);
+        material = _buildMaterial(data.shading, type, data.quality, data.withBump, data.withNormal, data.repeatU, data.repeatV, props);
         geom = _buildGeometry('case', data);
         mesh = new THREE.Mesh(geom, material);
     
@@ -498,23 +531,24 @@ AFRAME.registerComponent('diorama-case', {
 AFRAME.registerPrimitive( 'a-diorama', {
     defaultComponents: {
         'diorama-case__case': { 
-            'railheight': 1.2
         },
 
     },
     mappings: {
-        'bump': 'diorama-case.withBump',
-        'normal': 'diorama-case.withNormal',
-        'quality': 'diorama-case.quality',
-        'src': 'diorama-case.imageURL',
-        'srcfit': 'diorama-case.srcFit',
-        'contenttype': 'diorama-case.contentType',
-        'type': 'diorama-case.type',
-        'title': 'diorama-case.title',
-        'textt': 'diorama-case.textt',
-        'url': 'diorama-case.url',
-        'provider': 'diorama-case.provider',
-        'connectionname': 'diorama-case.connectionName',
+        'bump': 'diorama-case__case.withBump',
+        'normal': 'diorama-case__case.withNormal',
+        'quality': 'diorama-case__case.quality',
+        'src': 'diorama-case__case.imageURL',
+        'srcfit': 'diorama-case__case.srcFit',
+        'railheight': 'diorama-case__case.railheight',
+        'shading': 'diorama-case__case.shading',
+        'contenttype': 'diorama-case__case.contentType',
+        'type': 'diorama-case__case.type',
+        'title': 'diorama-case__case.title',
+        'textt': 'diorama-case__case.textt',
+        'url': 'diorama-case__case.url',
+        'provider': 'diorama-case__case.provider',
+        'connectionname': 'diorama-case__case.connectionName',
         // 'tags': 'diorama-case.tags',
     }
 });
@@ -559,9 +593,13 @@ AFRAME.registerComponent('diorama-object', {
 
         avatarurl: { type: 'string', default: '' },
         contactName: { type: 'string', default: '' },
-        contactHandle: { type: 'string', default: '' }
+        contactHandle: { type: 'string', default: '' },
         // tags: { default: [] },
+
+        shading: { default: 'default' },
     },
+
+    multiple: true,
 
     update: function() {
         var self = this;
@@ -769,27 +807,29 @@ AFRAME.registerComponent('diorama-object', {
 
 AFRAME.registerPrimitive( 'a-diorama-object', {
     defaultComponents: {
-        'diorama-object': {
+        'diorama-object__obj': {
             'railheight': 1.2
         },
 
     },
     mappings: {
-        'facet': 'diorama-object.facet',
-        'contenttype': 'diorama-object.contentType',
-        'type': 'diorama-object.type',
-        'title': 'diorama-object.title',
-        'textt': 'diorama-object.textt',
-        'url': 'diorama-object.url',
-        'provider': 'diorama-object.provider',
-        'connectionname': 'diorama-object.connectionName',
-        'providericon': 'diorama-object.providerIcon',
-        'contenticon': 'diorama-object.contentIcon',
-        'eventicon': 'diorama-object.eventIcon',
-        'context': 'diorama-object.context',
-        'datetime': 'diorama-object.datetime',
-        'avatarurl': 'diorama-object.avatarurl',
-        'contactname': 'diorama-object.contactName',
-        'contacthandle': 'diorama-object.contactHandle',
+        'facet': 'diorama-object__obj.facet',
+        'contenttype': 'diorama-object__obj.contentType',
+        'type': 'diorama-object__obj.type',
+        'title': 'diorama-object__obj.title',
+        'textt': 'diorama-object__obj.textt',
+        'url': 'diorama-object__obj.url',
+        'provider': 'diorama-object__obj.provider',
+        'connectionname': 'diorama-object__obj.connectionName',
+        'providericon': 'diorama-object__obj.providerIcon',
+        'contenticon': 'diorama-object__obj.contentIcon',
+        'eventicon': 'diorama-object__obj.eventIcon',
+        'context': 'diorama-object__obj.context',
+        'datetime': 'diorama-object__obj.datetime',
+        'avatarurl': 'diorama-object__obj.avatarurl',
+        'contactname': 'diorama-object__obj.contactName',
+        'contacthandle': 'diorama-object__obj.contactHandle',
+        'railheight': 'diorama-object__obj.railheight',
+        'shading': 'diorama-object__obj.shading',
     }
 })

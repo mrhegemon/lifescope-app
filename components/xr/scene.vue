@@ -24,7 +24,7 @@
     <!-- gallery -->
     <gallery/>
 
-    <avatarcomp ref="avatar"/>
+    <avatar ref="avatar"/>
 
     <!-- Sky id="Sky" -->
     <a-sky v-if="skybox==SkyboxEnum.STARS"
@@ -47,14 +47,14 @@ import easyrtc from '../../static/easyrtc/easyrtc.js';
 
 import gallery from "./components/gallery.vue";
 
-import avatarcomp from "./components/avatar/avatar";
+import avatar from "./components/avatar/avatar";
 
 import { SkyboxEnum } from '../../store/modules/xr/modules/graphics';
 
 export default {
     components: {
         gallery,
-        avatarcomp
+        avatar
     },
     data() {
       return {
@@ -65,7 +65,8 @@ export default {
 
     computed: {
       ...mapState('xr',
-        ['roomName']
+        ['roomName',
+        'sceneLoaded']
       ),
 
       ...mapState('xr/graphics',
@@ -107,8 +108,8 @@ export default {
       // make eyes invisible to user when the avatar is created
       document.body.addEventListener('entityCreated', function (evt) {
         if (evt.detail.el.id === 'playerRig') {
-          document.getElementsByClassName('player')[0].getElementsByClassName('face')[0].setAttribute('visible', 'false');
-          document.getElementsByClassName('player')[0].getElementsByClassName('head')[0].setAttribute('visible', 'false');
+          // document.getElementsByClassName('player')[0].getElementsByClassName('face')[0].setAttribute('visible', 'false');
+          // document.getElementsByClassName('player')[0].getElementsByClassName('head')[0].setAttribute('visible', 'false');
         }
       });
 
@@ -118,18 +119,7 @@ export default {
           
       var queryRoom = this.$route.query.room || 'ls-room';
 
-      // this.$store.dispatch('xr/setRoomName', queryRoom).then(() => {
-      //   this.$store.dispatch('xr/getRoomConfig').then(() => {
-      //     this.$store.dispatch('xr/getObjs').then(() => {
 
-            if (AFRAME.utils.device.isMobile()) {
-              self.setupMobile();
-            } else {
-              self.setupDesktop();
-            }
-      //     })
-      //   });
-      // });
       
     },
 
@@ -140,6 +130,12 @@ export default {
         var self = this;
         self.$store.commit('xr/SET_SCENELOADED');
         self.$store.commit('xr/SET_ISMOBILE');
+
+        if (AFRAME.utils.device.isMobile()) {
+            self.setupMobile();
+        } else {
+          self.setupDesktop();
+        }
       },
 
       onEnterVR () {

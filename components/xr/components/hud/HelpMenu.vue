@@ -34,12 +34,15 @@
 <script>
 import { mapState } from 'vuex';
 
+import HudUtils from './hudutils';
+
 export default {
 
     data() {
         return {
             helpStyleObject: {
-                visibility: 'visible',
+                visibility: 'hidden',//'visible',
+                opacity: 0
             },
         }
     },
@@ -53,21 +56,25 @@ export default {
 
     mounted() {
         var self = this;
+        self.hudUtils = new HudUtils();
 
-        document.body.addEventListener('keypress', function(evt) {
-            if (evt.key == 'h') {
-                self.toggleHelpVisibility();
-            }
-        });
+        document.body.addEventListener('keypress', self.keypressListener);
+    },
+
+    beforeDestroy() {
+        document.body.removeEventListener('keypress', this.keypressListener)
     },
 
     methods: {
+        keypressListener(evt) {
+            if (evt.key == 'h') {
+                this.toggleHelpVisibility();
+            }
+        },
         toggleHelpVisibility() {
             // if (CONFIG.DEBUG) {console.log("toggleHelpVisibility");}
-            this.helpStyleObject.visibility = 
-                this.helpStyleObject.visibility == 'visible' ?
-                'hidden' : 'visible';
-        }
+            this.hudUtils.toggleHud(this.helpStyleObject);
+        },
     },
 }
 </script>

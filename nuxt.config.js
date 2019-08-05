@@ -400,7 +400,10 @@ export default {
 			src: './plugins/vue-aframe',
 			ssr: false
 		},
-		// './plugins/vue2-hammer'
+		{
+			src: './plugins/vue2-hammer',
+			ssr: false
+		}
 		// {
 		// 	src: './plugins/sw.js',
 		// 	ssr: false

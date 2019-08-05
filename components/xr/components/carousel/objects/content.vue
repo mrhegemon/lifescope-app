@@ -11,6 +11,13 @@
 			:connectionname="connection.name"
 			:providericon="providerIonicon"
 			:contenticon="contentTypeIonicon"
+            :radius="floorRadius"
+            :railheight="railHeight"
+            :radialsegments="numberOfSegments"
+            :bump="bump"
+            :normal="normal"
+            :quality="textureQuality"
+            :shading="textureShading"
 			/>
 		<a-diorama-object v-else
 			facet='content'
@@ -24,6 +31,13 @@
 			:connectionname="connection.name"
 			:providericon="providerIonicon"
 			:contenticon="contentTypeIonicon"
+            :radius="floorRadius"
+            :railheight="railHeight"
+            :radialsegments="numberOfSegments"
+            :bump="bump"
+            :normal="normal"
+            :quality="textureQuality"
+            :shading="textureShading"
 			/>
 			<!-- :tags="content.tags" -->
 	</a-entity>
@@ -32,6 +46,9 @@
 <script>
 var CONFIG = {};
 CONFIG.DEBUG = false;
+import { mapState } from 'vuex';
+
+import { GraphicsQualityEnum, ShadingEnum } from '../../../../../store/modules/xr/modules/graphics';
 
 import icons from '../../../../../lib/util/icons';
 import FAIonicon from '../../aframe/font-awesome-ionicons';
@@ -87,6 +104,44 @@ export default {
 			var regex=/fa\-[a-zA-Z\-]+/i;
 			return FAIonicon[icon.match(regex)[0]];
 		},
+        textureQuality() {
+			switch (this.quality) {
+                case GraphicsQualityEnum.LOW:
+                    return 's';
+                case GraphicsQualityEnum.MEDIUM:
+                    return 'm';
+                case GraphicsQualityEnum.HIGH:
+                    return 'l';
+                default:
+                    return 'l';
+            }
+        },
+        textureShading() {
+            switch (this.shading) {
+                case ShadingEnum.DEFAULT:
+                    return 'default';
+                case ShadingEnum.CEL:
+                    return 'cel';
+                default:
+                    return 'default';
+            }
+        },
+		...mapState('xr/carousel',
+            [
+                'pageStart',
+                'numberOfSegments',
+                'floorRadius',
+                'railHeight'
+            ]
+        ),
+        ...mapState('xr/graphics',
+            [
+                'bump',
+                'normal',
+                'quality',
+                'shading'
+            ]
+        ),
     },
   }
 </script>

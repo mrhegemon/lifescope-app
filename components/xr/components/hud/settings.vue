@@ -23,16 +23,31 @@
                 </div>
             </div>
             
+            <h3> Carousel </h3>
+            <div class="input-carousel">
+                <input type="number" id="car-setting-segements" name="segments"
+                        v-model="inputSegments"
+                        min="12" max="121">
+                <label for="car-setting-segements">Segments</label>
+
+                <input type="number" id="car-setting-radius" name="floorradius"
+                        v-model="inputFloorRadius"
+                        min="1">
+                <label for="car-setting-radius">Floor Radius</label>
+            </div>
+            <input type="button" v-on:click="updateCarousel" id="car-setting-button" name="car-settings"
+                value="Update Carousel">
+            
 
             <h3> Map </h3>
             <div class="latlong">
                 <input type="number" id="map-setting-lat" name="lat"
-                        v-model="mapLatitude"
+                        v-model="inputMapLatitude"
                         min="-90" max="90">
                 <label for="map-setting-lat">Latitude</label>
 
                 <input type="number" id="map-setting-long" name="long"
-                        v-model="mapLongitude"
+                        v-model="inputMapLongitude"
                         min="-180" max="180">
                 <label for="map-setting-long">Longitude</label>
             </div>
@@ -42,7 +57,8 @@
 
 
             <!-- <h3> Set coordinates </h3> -->
-            <input type="button" v-on:click="setCoords" id="map-setting-latlon" name="coords"></button>
+            <input type="button" v-on:click="setCoords" id="map-setting-latlon" name="coords"
+                            value="Update Coordinates">
             
 
             <div class="input-map">
@@ -74,6 +90,13 @@
                 </div>
             </div>
 
+            <h2> Shading </h2>
+
+             <select v-model="shading">
+                <option value="DEFAULT">Default</option>
+                <option value="CEL">Cel</option>
+            </select> 
+
             <h2> Quality </h2>
             <div class="input-quality">
                 <div>
@@ -103,7 +126,9 @@
 <script>
 import { mapState } from 'vuex';
 
-import { SkyboxEnum, GraphicsQualityEnum } from '../../../../store/modules/xr/modules/graphics';
+import { SkyboxEnum, GraphicsQualityEnum, ShadingEnum } from '../../../../store/modules/xr/modules/graphics';
+
+import HudUtils from './hudutils';
 
 export default {
 
@@ -113,57 +138,60 @@ export default {
             qualitySetting: 'HIGH',
             settingsStyleObject: {
                 visibility: 'hidden',
+                opacity: 0
             },
             mapFloorCheck: false,
             lat: 0,
             lon: 0,
+            carouselDimensions: {
+                segments: 24,
+                radius: 5
+            }
         }
     },
 
     computed: {
         mapFloorSetting: {
-            get () { return this.$store.state.xr.graphics.mapFloorSetting;},
+            get () { return this.$store.state.xr.map.mapFloorSetting;},
             set (val) { 
-                // console.log(this.$store.state.xr.graphics.mapFloorSetting);
-                this.$store.commit('xr/graphics/SET_FLOOR_MAP_ACTIVE', val);
-                // console.log(this.$store.state.xr.graphics.mapFloorSetting);
+                this.$store.commit('xr/map/SET_FLOOR_MAP_ACTIVE', val);
                  }
         },
         mapWorldSetting: {
-            get () { return this.$store.state.xr.graphics.worldMapActive;},
+            get () { return this.$store.state.xr.map.worldMapActive;},
             set (val) { 
-                // console.log(this.$store.state.xr.graphics)
-                this.$store.commit('xr/graphics/SET_WORLD_MAP_ACTIVE', val);
+                this.$store.commit('xr/map/SET_WORLD_MAP_ACTIVE', val);
                 }
         },
-        // mapLatitude: {
-        //     get () { return this.$store.state.xr.graphics.mapLatitude;},
-        //     set (val) { this.$store.commit('xr/graphics/SET_MAP_LATITUDE', val); }
-        // },
-        // mapLongitude: {
-        //     get () { return this.$store.state.xr.graphics.mapLongitude;},
-        //     set (val) { this.$store.commit('xr/graphics/SET_MAP_LONGITUDE', val); }
-        // },
         mapLatitude: {
-            get () { return this.lat},
-            set (val) { this.lat = val }
+            get () { return this.$store.state.xr.map.mapLatitude;},
+            set (val) { this.$store.commit('xr/map/SET_MAP_LATITUDE', val); }
         },
         mapLongitude: {
-            get () { return this.lon},
+            get () { return this.$store.state.xr.map.mapLongitude;},
+            set (val) { this.$store.commit('xr/map/SET_MAP_LONGITUDE', val); }
+        },
+        inputMapLatitude: {
+            get () { return this.lat },
+            set (val) { this.lat = val }
+        },
+        inputMapLongitude: {
+            get () { return this.lon },
             set (val) { this.lon = val }
         },
-        mapLatLon: {
-            get () {
-                // return [9,24]
-                return [this.lat, this.lon]
-                // return [this.$store.state.xr.graphics.mapLatitude, this.$store.state.xr.graphics.mapLongitude];
-            },
-            set(val1) {
-                alert('hello');
-                console.log('no error');
-                // this.$store.commit('xr/graphics/SET_MAP_LATITUDE', this.lat);
-                // this.$store.commit('xr/graphics/SET_MAP_LONGITUDE', this.lon);
-            }
+
+        inputSegments: {
+            get () { return this.carouselDimensions.segments },
+            set (val) { this.carouselDimensions.segments = val }
+        },
+        inputFloorRadius: {
+            get () { return this.carouselDimensions.radius },
+            set (val) { this.carouselDimensions.radius = val }
+        },
+
+        shading: {
+            get () { return this.$store.state.xr.graphics.shading;},
+            set (val) { this.$store.commit('xr/graphics/SET_SHADING', val); }
         },
 
         bump: {
@@ -184,6 +212,11 @@ export default {
             'skybox',
             'quality'
         ]),
+        ...mapState('xr/carousel',
+        [
+            'numberOfSegments',
+            'floorRadius'
+        ])
     },
 
     watch: {
@@ -205,18 +238,20 @@ export default {
         },
         mapFloorCheck: function (newVal, oldVal) {
             // this.mapFloorSetting.set(newVal);
-            this.toggleLoadingVisibility();
-            this.$store.commit('xr/graphics/SET_FLOOR_MAP_ACTIVE', newVal);
-            this.toggleLoadingVisibility();
+            this.$store.commit('xr/map/SET_FLOOR_MAP_ACTIVE', newVal);
         }
     },
 
     mounted() {
         var self = this;
+        self.hudUtils = new HudUtils();
         document.body.addEventListener('keypress', self.keypressListener);
         
         self.inputMapLatitude = self.mapLatitude;
         self.inputMapLongitude = self.mapLongitude;
+
+        self.inputSegments = self.numberOfSegments;
+        self.inputFloorRadius = self.floorRadius;
 
         document.body.addEventListener('swapsky', self.swapskyListener);
     },
@@ -236,18 +271,19 @@ export default {
             this.toggleSky();
         },
         toggleSettingsVisibility() {
-            // if (CONFIG.DEBUG) {console.log("toggleSettingsVisibility");}
-            this.settingsStyleObject.visibility = 
-                this.settingsStyleObject.visibility == 'visible' ?
-                'hidden' : 'visible';
+                this.hudUtils.toggleHud(this.settingsStyleObject);
         },
         toggleSky() {
             var newVal = this.skybox == SkyboxEnum.STARS ? 'SUN' : 'STARS';
             this.$store.commit('xr/graphics/SET_SKYBOX', newVal);
         },
         setCoords() {
-            this.$store.commit('xr/graphics/SET_MAP_LATITUDE', this.lat);
-            this.$store.commit('xr/graphics/SET_MAP_LONGITUDE', this.lon);
+            this.$store.commit('xr/map/SET_MAP_LATITUDE', this.lat);
+            this.$store.commit('xr/map/SET_MAP_LONGITUDE', this.lon);
+        },
+        updateCarousel() {
+            this.$store.commit('xr/carousel/SET_NUMBER_OF_SEGMENTS', this.carouselDimensions.segments);
+            this.$store.commit('xr/carousel/SET_FLOOR_RADIUS', this.carouselDimensions.radius);
         }
     },
 }

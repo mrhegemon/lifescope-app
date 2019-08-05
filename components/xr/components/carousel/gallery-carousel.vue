@@ -1,11 +1,16 @@
 <template>
     <a-entity class="gallery-carousel">
-        <a-rail v-for="n in numberOfSegments"
+        <a-rail v-for="n in radialsegments"
             :key="'railSegment' + n"
             :rotation="railRotation(n-1)"
             :position="railPosition(n-1)"
+            :radius="floorRadius"
+            :railheight="railHeight"
+            :radialsegments="numberOfSegments"
             :bump="bump"
-            :normal="normal"/>
+            :normal="normal"
+            :quality="textureQuality"
+            :shading="textureShading"/>
         <a-entity v-if="$store.state.objects.content.length > 0 ||
                             $store.state.objects.contacts.length > 0 ||
                             $store.state.objects.events.length > 0 ">
@@ -53,6 +58,7 @@
 
 <script>
 import { mapState } from 'vuex';
+import { GraphicsQualityEnum, ShadingEnum } from '../../../../store/modules/xr/modules/graphics';
 
 import UserContact from './objects/contact.vue';
 import UserContent from './objects/content.vue';
@@ -60,13 +66,6 @@ import UserEvent from './objects/event.vue';
 import UserPerson from './objects/people.vue';
 
 export default {
-    data () {
-        return {
-            railheight: 1.2,
-            floorradius: 6,
-        }
-    },
-
     components: {
         UserContact,
         UserContent,
@@ -74,9 +73,10 @@ export default {
         UserPerson
     },
 
-
-
     computed: {
+        radialsegments() {
+            return Math.max(this.numberOfSegments, 12);
+        },
         sortedLSObjs() {
             var sorted = this.LSObjs;
             sorted.sort(function (a, b) {
@@ -106,6 +106,28 @@ export default {
         numberOfItemsToDisplay() {
             return Math.min(this.numberOfSegments, this.items.length);
         },
+        textureQuality() {
+            switch (this.quality) {
+                case GraphicsQualityEnum.LOW:
+                    return 's';
+                case GraphicsQualityEnum.MEDIUM:
+                    return 'm';
+                case GraphicsQualityEnum.HIGH:
+                    return 'l';
+                default:
+                    return 'l';
+            }
+        },
+        textureShading() {
+            switch (this.shading) {
+                case ShadingEnum.DEFAULT:
+                    return 'default';
+                case ShadingEnum.CEL:
+                    return 'cel';
+                default:
+                    return 'default';
+            }
+        },
         // vuex store
         ...mapState('xr',
             [
@@ -116,13 +138,17 @@ export default {
         ...mapState('xr/carousel',
             [
                 'pageStart',
-                'numberOfSegments'
+                'numberOfSegments',
+                'floorRadius',
+                'railHeight'
             ]
         ),
         ...mapState('xr/graphics',
             [
                 'bump',
-                'normal'
+                'normal',
+                'quality',
+                'shading'
             ]
         ),
     },
@@ -135,11 +161,10 @@ export default {
                 return this.roomConfig.bucket_route + '/' + this.roomConfig.BUCKET_NAME + '/' + image.route;
         },
         railRotation: function(segment) {
-            var u = segment / this.numberOfSegments + 0.5 / this.numberOfSegments;
-            // 0.5/36 to get to the post
+            var u = segment / this.numberOfSegments;
             var theta =  (-3*Math.PI/4) - (u * Math.PI * 2);
 
-            var roty = theta * (180/Math.PI) + 5;
+            var roty = theta * (180/Math.PI);
             var rotx = 0;
 
             return `${rotx} ${roty} 0`;
@@ -152,8 +177,8 @@ export default {
             var sinTheta = Math.sin( theta );
             var cosTheta = Math.cos( theta );
 
-            var x = this.floorradius * sinTheta;
-            var z = this.floorradius * cosTheta;
+            var x = this.floorRadius * sinTheta;
+            var z = this.floorRadius * cosTheta;
 
             return `${x} 0 ${z}`;
         },
@@ -176,8 +201,8 @@ export default {
             var sinTheta = Math.sin( theta );
             var cosTheta = Math.cos( theta );
 
-            var x = this.floorradius * sinTheta;
-            var z = this.floorradius * cosTheta;
+            var x = this.floorRadius * sinTheta;
+            var z = this.floorRadius * cosTheta;
 
             return `${x} 0 ${z}`;
         },
