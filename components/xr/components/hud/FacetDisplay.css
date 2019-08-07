@@ -1,0 +1,64 @@
+.facet-display {
+    z-index:10001;
+    border: 1px solid #7b7b7b;
+    border-radius: 24px 24px 0 0;
+    background-color: #3c3c3c;
+    /*#e8f1ff;*/
+    align-self: center;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 10px;
+    text-align: center;
+    position: absolute; /*relative;*/
+    top: 10px;
+    width: 15%;
+    left: 42.5%;
+    font-weight: bold;
+    font-size: 24px;
+    pointer-events: visible;
+    color:    #aeaeae;
+    box-shadow: 0 0 5px 1px #edeeee;
+}
+
+.facet-display:hover {
+    border-radius: 24px;
+}
+
+.current-facet {
+    border-bottom: solid;
+}
+
+.facet-links {
+    display: none;
+}
+
+.facet-links a:link {
+    color: #aeaeae;
+}
+
+.facet-links a:hover {
+    color: #2AC1DE;
+}
+
+.facet-links a:visited {
+    color: #aeaeae;
+}
+
+.facet-links a:visited:hover {
+    color: #2AC1DE;
+}
+.facet-links a:visited:active {
+    color: #f93;
+}
+
+.facet-links a:active {
+    color: #f93;
+}
+
+.facet-display:hover .facet-links {
+    display: block;
+}
+
+.mobile-hud {
+    font-size: 12px;
+}

@@ -1,4 +1,4 @@
-@font-face{
+/* @font-face{
     font-family:"Ionicons";
 
     src:url("../../static/fonts/ionicons.eot?v=2.0.1");
@@ -10,7 +10,7 @@
     font-weight:normal;
     font-style:normal
 }
-body{font-family:Ionicons;}
+body{font-family:Ionicons;} */
 .visuallyhidden {
     display: block;
     border: 0;

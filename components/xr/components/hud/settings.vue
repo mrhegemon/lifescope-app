@@ -90,12 +90,12 @@
                 </div>
             </div>
 
-            <h2> Shading </h2>
+            <!-- <h2> Shading </h2>
 
              <select v-model="shading">
                 <option value="DEFAULT">Default</option>
                 <option value="CEL">Cel</option>
-            </select> 
+            </select>  -->
 
             <h2> Quality </h2>
             <div class="input-quality">

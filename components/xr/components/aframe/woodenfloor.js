@@ -41,9 +41,6 @@ AFRAME.registerComponent('wooden-floor', {
 
         floor.position.set(this.data.x, this.data.y, this.data.z);
 
-        // var mesh = self.el.getObject3D('mesh') || new THREE.Group();
-        //if (this.data.helper) {mesh.add(new THREE.BoxHelper(floor, HELPER_COLOR));}
-        // mesh.add(floor);
         self.el.setObject3D('mesh', floor);
     },
 

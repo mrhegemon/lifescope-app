@@ -1,7 +1,7 @@
 <template>
   <div id="xrapp">
     <aframe-scene></aframe-scene>
-    <!-- <hud v-if="sceneLoaded"></hud> -->
+    <hud v-if="sceneLoaded"></hud>
   </div>
 </template>
 

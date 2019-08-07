@@ -26,6 +26,32 @@ export const state = function () {
     }
 };
 
+export const getters = {
+    numberOfLSObjs: state => {
+        return state.LSObjs.length;
+    },
+    facetItems (state, getters, rootState, rootGetters) {
+        var items = [];
+        switch (rootState.facet) {
+            case 'content':
+                items = rootState.objects.content;
+                break;
+            case 'contacts':
+                items = rootState.objects.contacts;
+                break;
+            case 'events':
+                items = rootState.objects.events;
+                break;
+            default:
+                break;
+        }
+        return items;
+    },
+    itemsLength(state, getters, rootState, rootGetters) {
+        return getters.facetItems.length;
+    },
+};
+
 export const mutations = {
         SET_IN_VR: function(state, active=true) {
             // if (CONFIG.DEBUG) {console.log("SET_IN_VR")}
@@ -82,36 +108,13 @@ export const actions = {
             })
         },
 
-        getObjs (context) {
-            // if (CONFIG.DEBUG) {console.log("getObjs action");};
-
-            var x = '/' + context.state.roomConfig.BUCKET_PATH;
-    
-            // context.commit('SET_ROOMNAME', 'ls-room');
-    
-            return axios.get(x)
-            .then((res) => {
-                var objs = [];
-                var rooms = Object.keys(res.data);
-                if (res.data[context.state.roomName] !== undefined) {
-                    var someData = res.data[context.state.roomName].forEach(element => {
-                        objs.push(element);
-                    });
-                }
-                context.commit('SET_LSOBJS', objs);
-                context.commit('SET_ROOMS', rooms);
-            })
-            .catch(function (error) {
-                // handle error
-                console.log(error);
-            })
-        }
 };
 
 const xrModule = {
     namespaced: true,
     modules,
     state,
+    getters,
     mutations,
     actions
 };

@@ -24,7 +24,7 @@ export const mutations = {
             state.pageStart += state.pageStep;
         }
         else {
-            state.pageStart = length - state.numberOfSegments;
+            state.pageStart = length - Math.min(state.numberOfSegments, length);
         }
     },
     SET_NUMBER_OF_SEGMENTS: function(state, val) {

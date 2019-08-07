@@ -49,4 +49,9 @@
 
 .paginatorFill {
     flex-grow: 2;
+    color:    #aeaeae;
+    text-align: center;
+    align-self: center;
+    font-size: 1.25em;
+    font-weight: 150;
 }

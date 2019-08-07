@@ -11,7 +11,7 @@ import 'aframe-input-mapping-component';
 // import '../components/xr/components/aframe/play-gaze.js';
 // import '../components/xr/components/aframe/dynamic-autoplay.js';
 // import '../components/xr/components/aframe/avatar-rig';
-import '../components/xr/components/aframe/ionicon';
+// import '../components/xr/components/aframe/ionicon';
 // import '../components/xr/components/aframe/mapbox-terrain.js';
 import '../components/xr/components/aframe/diorama.js';
 import '../components/xr/components/aframe/woodenfloor.js';

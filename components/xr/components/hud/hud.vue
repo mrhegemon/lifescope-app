@@ -1,5 +1,6 @@
 <template>
   <div id="hud" class="hud">
+        <facet-display/>
         <help-menu
             :class="helpClassObject"
             v-hammer:swipe.up.down="(event) => changeHelpVisibility(event)"/>
@@ -11,12 +12,14 @@
 <script>
 import { mapState } from 'vuex';
 
+import FacetDisplay from './FacetDisplay.vue';
 import HelpMenu from './HelpMenu.vue';
 import paginator from './paginator.vue';
 import settings from './settings.vue';
 
 export default {
     components: {
+        FacetDisplay,
         HelpMenu,
         paginator,
         settings

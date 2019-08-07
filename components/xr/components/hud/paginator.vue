@@ -3,6 +3,7 @@
         <div class="pageLeft" @click="pageLeft">
         </div>
         <div class="paginatorFill">
+            {{pageStart}}-{{lastItemIndex}} / {{itemsLength}}
         </div>
         <div class="pageRight" @click="pageRight">
         </div>
@@ -10,15 +11,27 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 export default {
 
     computed: {
-      ...mapState('xr',
-      [
-        'isMobile',
-      ])
+        ...mapState('xr',
+        [
+            'isMobile',
+        ]),
+        ...mapGetters('xr',
+        [
+            'itemsLength'
+        ]),
+        ...mapState('xr/carousel',
+        [
+            'pageStart',
+            'numberOfSegments'
+        ]),
+        lastItemIndex() {
+            return Math.min(this.pageStart + this.numberOfSegments, this.itemsLength);
+        }
     },
 
     methods: {
@@ -28,7 +41,9 @@ export default {
         },
         pageRight() {
             // if(CONFIG.DEBUG) {console.log("hud pageRight");}
-            this.$store.dispatch('xr/carousel/pageRight');
+            this.$store.dispatch('xr/carousel/pageRight', {
+                length: this.itemsLength
+            });
         }
     },
 }

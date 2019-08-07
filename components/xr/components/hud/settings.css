@@ -56,3 +56,7 @@
 .help-settings h2 {
     line-height: 1em;
 }
+
+input {
+    color:    #aeaeae;
+}
