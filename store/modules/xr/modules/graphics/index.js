@@ -27,7 +27,7 @@ export const state = function () {
 
 export const mutations = {
     SET_SKYBOX: function(state, val) {
-        if (CONFIG.DEBUG) {console.log("SET_SKYBOX");}
+        // if (CONFIG.DEBUG) {console.log("SET_SKYBOX");}
         if (SkyboxEnum.hasOwnProperty(val)) {
             state.skybox = SkyboxEnum[val];
         }
@@ -36,7 +36,7 @@ export const mutations = {
         }
     },
     SET_QUALITY: function(state, val) {
-        if (CONFIG.DEBUG) {console.log("SET_QUALITY");}
+        // if (CONFIG.DEBUG) {console.log("SET_QUALITY");}
         if (GraphicsQualityEnum.hasOwnProperty(val)) {
             state.quality = GraphicsQualityEnum[val];
         }
@@ -45,7 +45,7 @@ export const mutations = {
         }
     },
     SET_SHADING: function(state, val) {
-        if (CONFIG.DEBUG) {console.log("SET_SHADING");}
+        // if (CONFIG.DEBUG) {console.log("SET_SHADING");}
         console.log(val);
         if (ShadingEnum.hasOwnProperty(val)) {
             state.shading = ShadingEnum[val];
@@ -55,11 +55,11 @@ export const mutations = {
         }
     },
     SET_BUMP: function(state, active=true) {
-        if (CONFIG.DEBUG) {console.log(`SET_BUMP: ${active}`)}
+        // if (CONFIG.DEBUG) {console.log(`SET_BUMP: ${active}`)}
         state.bump = active ? true : false;
     },
     SET_NORMAL: function(state, active=true) {
-        if (CONFIG.DEBUG) {console.log(`SET_NORMAL: ${active}`)}
+        // if (CONFIG.DEBUG) {console.log(`SET_NORMAL: ${active}`)}
         state.normal = active ? true : false;
     },
 };

@@ -11,12 +11,12 @@
         <gallery-carousel />
       
         <!-- Earth -->
+        <globe/>
         <a-sphere id="Earth" class="boundry"
                     :position="'0 1.5 0' " 
                     radius=".99" 
                     material="src:#earth; roughness: 1; transparent: true; opacity: 0.9;"
                     animation="property: rotation; easing: linear; to: 0 360; dur: 150000; loop: true;">
-
         </a-sphere>
 
         <!-- Logo  -->
@@ -43,12 +43,14 @@
 <script>
 import { mapState } from 'vuex';
 
+import globe from "./globe.vue";
 import galleryCarousel from "./carousel/gallery-carousel.vue";
 
 export default {
 
     components: {
-        galleryCarousel
+        galleryCarousel,
+        globe
     },
 
     computed: {
